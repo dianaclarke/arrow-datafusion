@@ -18,7 +18,11 @@
 mod column;
 mod dfschema;
 mod error;
+mod scalar;
 
 pub use column::Column;
-pub use dfschema::{DFField, DFSchema, DFSchemaRef, ToDFSchema};
+pub use dfschema::{DFField, DFSchema, DFSchemaRef, ExprSchema, ToDFSchema};
 pub use error::{DataFusionError, Result};
+pub use scalar::{
+  ScalarType, ScalarValue, MAX_PRECISION_FOR_DECIMAL128, MAX_SCALE_FOR_DECIMAL128,
+};
