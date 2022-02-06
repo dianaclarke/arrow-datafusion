@@ -20,5 +20,5 @@ mod dfschema;
 mod error;
 
 pub use column::Column;
-pub use dfschema::{DFField, DFSchema, DFSchemaRef, ToDFSchema};
+pub use dfschema::{DFField, DFSchema, DFSchemaRef, ExprSchema, ToDFSchema};
 pub use error::{DataFusionError, Result};
