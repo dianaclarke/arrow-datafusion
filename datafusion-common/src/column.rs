@@ -75,7 +75,7 @@ impl Column {
     }
 
     // Internal implementation of normalize
-    fn normalize_with_schemas(
+    pub fn normalize_with_schemas(
         self,
         schemas: &[&Arc<DFSchema>],
         using_columns: &[HashSet<Column>],
