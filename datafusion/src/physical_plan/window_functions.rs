@@ -23,130 +23,17 @@
 use crate::error::{DataFusionError, Result};
 use crate::physical_plan::functions::{TypeSignature, Volatility};
 use crate::physical_plan::{
-    aggregates, aggregates::AggregateFunction, functions::Signature,
-    type_coercion::data_types, windows::find_ranges_in_range, PhysicalExpr,
+    aggregates, functions::Signature, type_coercion::data_types,
+    windows::find_ranges_in_range, PhysicalExpr,
 };
 use arrow::array::ArrayRef;
 use arrow::datatypes::DataType;
 use arrow::datatypes::Field;
 use arrow::record_batch::RecordBatch;
+pub use datafusion_expr::{BuiltInWindowFunction, WindowFunction};
 use std::any::Any;
 use std::ops::Range;
 use std::sync::Arc;
-use std::{fmt, str::FromStr};
-
-/// WindowFunction
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum WindowFunction {
-    /// window function that leverages an aggregate function
-    AggregateFunction(AggregateFunction),
-    /// window function that leverages a built-in window function
-    BuiltInWindowFunction(BuiltInWindowFunction),
-}
-
-impl FromStr for WindowFunction {
-    type Err = DataFusionError;
-    fn from_str(name: &str) -> Result<WindowFunction> {
-        let name = name.to_lowercase();
-        if let Ok(aggregate) = AggregateFunction::from_str(name.as_str()) {
-            Ok(WindowFunction::AggregateFunction(aggregate))
-        } else if let Ok(built_in_function) =
-            BuiltInWindowFunction::from_str(name.as_str())
-        {
-            Ok(WindowFunction::BuiltInWindowFunction(built_in_function))
-        } else {
-            Err(DataFusionError::Plan(format!(
-                "There is no window function named {}",
-                name
-            )))
-        }
-    }
-}
-
-impl fmt::Display for BuiltInWindowFunction {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            BuiltInWindowFunction::RowNumber => write!(f, "ROW_NUMBER"),
-            BuiltInWindowFunction::Rank => write!(f, "RANK"),
-            BuiltInWindowFunction::DenseRank => write!(f, "DENSE_RANK"),
-            BuiltInWindowFunction::PercentRank => write!(f, "PERCENT_RANK"),
-            BuiltInWindowFunction::CumeDist => write!(f, "CUME_DIST"),
-            BuiltInWindowFunction::Ntile => write!(f, "NTILE"),
-            BuiltInWindowFunction::Lag => write!(f, "LAG"),
-            BuiltInWindowFunction::Lead => write!(f, "LEAD"),
-            BuiltInWindowFunction::FirstValue => write!(f, "FIRST_VALUE"),
-            BuiltInWindowFunction::LastValue => write!(f, "LAST_VALUE"),
-            BuiltInWindowFunction::NthValue => write!(f, "NTH_VALUE"),
-        }
-    }
-}
-
-impl fmt::Display for WindowFunction {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            WindowFunction::AggregateFunction(fun) => fun.fmt(f),
-            WindowFunction::BuiltInWindowFunction(fun) => fun.fmt(f),
-        }
-    }
-}
-
-/// An aggregate function that is part of a built-in window function
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum BuiltInWindowFunction {
-    /// number of the current row within its partition, counting from 1
-    RowNumber,
-    /// rank of the current row with gaps; same as row_number of its first peer
-    Rank,
-    /// ank of the current row without gaps; this function counts peer groups
-    DenseRank,
-    /// relative rank of the current row: (rank - 1) / (total rows - 1)
-    PercentRank,
-    /// relative rank of the current row: (number of rows preceding or peer with current row) / (total rows)
-    CumeDist,
-    /// integer ranging from 1 to the argument value, dividing the partition as equally as possible
-    Ntile,
-    /// returns value evaluated at the row that is offset rows before the current row within the partition;
-    /// if there is no such row, instead return default (which must be of the same type as value).
-    /// Both offset and default are evaluated with respect to the current row.
-    /// If omitted, offset defaults to 1 and default to null
-    Lag,
-    /// returns value evaluated at the row that is offset rows after the current row within the partition;
-    /// if there is no such row, instead return default (which must be of the same type as value).
-    /// Both offset and default are evaluated with respect to the current row.
-    /// If omitted, offset defaults to 1 and default to null
-    Lead,
-    /// returns value evaluated at the row that is the first row of the window frame
-    FirstValue,
-    /// returns value evaluated at the row that is the last row of the window frame
-    LastValue,
-    /// returns value evaluated at the row that is the nth row of the window frame (counting from 1); null if no such row
-    NthValue,
-}
-
-impl FromStr for BuiltInWindowFunction {
-    type Err = DataFusionError;
-    fn from_str(name: &str) -> Result<BuiltInWindowFunction> {
-        Ok(match name.to_uppercase().as_str() {
-            "ROW_NUMBER" => BuiltInWindowFunction::RowNumber,
-            "RANK" => BuiltInWindowFunction::Rank,
-            "DENSE_RANK" => BuiltInWindowFunction::DenseRank,
-            "PERCENT_RANK" => BuiltInWindowFunction::PercentRank,
-            "CUME_DIST" => BuiltInWindowFunction::CumeDist,
-            "NTILE" => BuiltInWindowFunction::Ntile,
-            "LAG" => BuiltInWindowFunction::Lag,
-            "LEAD" => BuiltInWindowFunction::Lead,
-            "FIRST_VALUE" => BuiltInWindowFunction::FirstValue,
-            "LAST_VALUE" => BuiltInWindowFunction::LastValue,
-            "NTH_VALUE" => BuiltInWindowFunction::NthValue,
-            _ => {
-                return Err(DataFusionError::Plan(format!(
-                    "There is no built-in window function named {}",
-                    name
-                )))
-            }
-        })
-    }
-}
 
 /// Returns the datatype of the window function
 pub fn return_type(
