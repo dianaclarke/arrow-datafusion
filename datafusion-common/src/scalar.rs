@@ -665,7 +665,7 @@ impl ScalarValue {
     ///
     /// Example
     /// ```
-    /// use datafusion::scalar::ScalarValue;
+    /// use datafusion_common::ScalarValue;
     /// use arrow::array::{ArrayRef, BooleanArray};
     ///
     /// let scalars = vec![

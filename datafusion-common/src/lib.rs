@@ -18,6 +18,8 @@
 mod column;
 mod dfschema;
 mod error;
+#[cfg(feature = "pyarrow")]
+mod pyarrow;
 mod scalar;
 
 pub use column::Column;
