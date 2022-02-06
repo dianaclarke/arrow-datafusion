@@ -190,72 +190,7 @@ pub(crate) trait BuiltInWindowFunctionExpr: Send + Sync + std::fmt::Debug {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_window_function_case_insensitive() -> Result<()> {
-        let names = vec![
-            "row_number",
-            "rank",
-            "dense_rank",
-            "percent_rank",
-            "cume_dist",
-            "ntile",
-            "lag",
-            "lead",
-            "first_value",
-            "last_value",
-            "nth_value",
-            "min",
-            "max",
-            "count",
-            "avg",
-            "sum",
-        ];
-        for name in names {
-            let fun = WindowFunction::from_str(name)?;
-            let fun2 = WindowFunction::from_str(name.to_uppercase().as_str())?;
-            assert_eq!(fun, fun2);
-            assert_eq!(fun.to_string(), name.to_uppercase());
-        }
-        Ok(())
-    }
-
-    #[test]
-    fn test_window_function_from_str() -> Result<()> {
-        assert_eq!(
-            WindowFunction::from_str("max")?,
-            WindowFunction::AggregateFunction(AggregateFunction::Max)
-        );
-        assert_eq!(
-            WindowFunction::from_str("min")?,
-            WindowFunction::AggregateFunction(AggregateFunction::Min)
-        );
-        assert_eq!(
-            WindowFunction::from_str("avg")?,
-            WindowFunction::AggregateFunction(AggregateFunction::Avg)
-        );
-        assert_eq!(
-            WindowFunction::from_str("cume_dist")?,
-            WindowFunction::BuiltInWindowFunction(BuiltInWindowFunction::CumeDist)
-        );
-        assert_eq!(
-            WindowFunction::from_str("first_value")?,
-            WindowFunction::BuiltInWindowFunction(BuiltInWindowFunction::FirstValue)
-        );
-        assert_eq!(
-            WindowFunction::from_str("LAST_value")?,
-            WindowFunction::BuiltInWindowFunction(BuiltInWindowFunction::LastValue)
-        );
-        assert_eq!(
-            WindowFunction::from_str("LAG")?,
-            WindowFunction::BuiltInWindowFunction(BuiltInWindowFunction::Lag)
-        );
-        assert_eq!(
-            WindowFunction::from_str("LEAD")?,
-            WindowFunction::BuiltInWindowFunction(BuiltInWindowFunction::Lead)
-        );
-        Ok(())
-    }
+    use std::str::FromStr;
 
     #[test]
     fn test_count_return_type() -> Result<()> {
