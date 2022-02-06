@@ -25,16 +25,7 @@ pub use datafusion_common::{
 mod tests {
   use super::*;
   use crate::from_slice::FromSlice;
-  use arrow::{
-    array::*,
-    compute::kernels::cast::cast,
-    datatypes::{
-      ArrowDictionaryKeyType, ArrowNativeType, DataType, Field, Float32Type, Float64Type,
-      Int16Type, Int32Type, Int64Type, Int8Type, IntervalUnit, TimeUnit,
-      TimestampMicrosecondType, TimestampMillisecondType, TimestampNanosecondType,
-      TimestampSecondType, UInt16Type, UInt32Type, UInt64Type, UInt8Type,
-    },
-  };
+  use arrow::{array::*, datatypes::*};
   use std::cmp::Ordering;
   use std::sync::Arc;
 
