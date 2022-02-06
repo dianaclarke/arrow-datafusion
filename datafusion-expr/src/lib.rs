@@ -16,7 +16,6 @@
 // under the License.
 
 mod aggregate_function;
-<<<<<<< HEAD
 mod operator;
 mod window_frame;
 mod window_function;
@@ -24,9 +23,4 @@ mod window_function;
 pub use aggregate_function::AggregateFunction;
 pub use operator::Operator;
 pub use window_frame::{WindowFrame, WindowFrameBound, WindowFrameUnits};
-=======
-mod window_function;
-
-pub use aggregate_function::AggregateFunction;
->>>>>>> b53e5a16d (add datafusion-expr module)
 pub use window_function::{BuiltInWindowFunction, WindowFunction};
