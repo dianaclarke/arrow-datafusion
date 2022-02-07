@@ -25,7 +25,6 @@ readme = "../README.md"
 authors = ["Apache Arrow <dev@arrow.apache.org>"]
 license = "Apache-2.0"
 keywords = [ "arrow", "query", "sql" ]
-publish = false
 edition = "2021"
 rust-version = "1.58"
 
@@ -36,5 +35,5 @@ path = "src/lib.rs"
 [features]
 
 [dependencies]
-datafusion-common = { path = "../datafusion-common" }
+datafusion-common = { path = "../datafusion-common", version = "6.0.0" }
 arrow = { version = "8.0.0", features = ["prettyprint"] }
